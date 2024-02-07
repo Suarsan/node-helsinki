@@ -32,6 +32,12 @@ app.get('/api/info', (req, res) => {
 
 app.post('/api/persons', (req, res) => {
   const person = { id: Math.floor(Math.random() * 1000), ...req.body }
+  if (!person.name) {
+    res.status(401).json({ error: 'Name is required' })
+  }
+  if (persons.find(p => p.name === person.name)) {
+    res.status(401).json({ error: 'Person already exists' })
+  }
   persons = [...persons, person]
   res.send(204)
 })
