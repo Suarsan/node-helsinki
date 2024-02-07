@@ -1,6 +1,8 @@
 const express = require('express')
 const app = express()
 
+app.use(express.json())
+
 let persons = [
     { 
       "id": 1,
@@ -26,6 +28,12 @@ let persons = [
 
 app.get('/api/info', (req, res) => {
   res.send(`<p>Phonebook has info for ${persons.length} people</p><p>${new Date()}</p>`)
+})
+
+app.post('/api/persons', (req, res) => {
+  const person = { id: Math.floor(Math.random() * 1000), ...req.body }
+  persons = [...persons, person]
+  res.send(204)
 })
 
 app.get('/api/persons', (req, res) => {
