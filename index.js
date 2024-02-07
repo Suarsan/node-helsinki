@@ -28,8 +28,16 @@ app.get('/api/info', (req, res) => {
   res.send(`<p>Phonebook has info for ${persons.length} people</p><p>${new Date()}</p>`)
 })
 
+app.get('/api/persons/:id', (req, res) => {
+  const person = persons.find(p => p.id === parseInt(req.params.id))
+  if (!person) {
+    res.status(404).json({ error: 'Person not found' })
+  }
+  res.json(person)
+})
+
 app.get('/api/persons', (req, res) => {
-    res.json(persons)
+  res.json(persons)
 })
 
 const PORT = 3001
