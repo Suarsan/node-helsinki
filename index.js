@@ -1,10 +1,12 @@
 const express = require('express')
 const morgan = require('morgan')
+const cors = require('cors')
 
 const app = express()
 
 app.use(express.json())
 app.use(morgan('tiny'))
+app.use(cors())
 
 let persons = [
     { 
@@ -42,7 +44,7 @@ app.post('/api/persons', (req, res) => {
     res.status(401).json({ error: 'Person already exists' })
   }
   persons = [...persons, person]
-  res.send(204)
+  res.send(person)
 })
 
 app.get('/api/persons', (req, res) => {
@@ -59,7 +61,7 @@ app.get('/api/persons/:id', (req, res) => {
 
 app.delete('/api/persons/:id', (req, res) => {
   persons = persons.filter(p => p.id !== parseInt(req.params.id))
-  res.status(204).end()
+  res.send({id: parseInt(req.params.id)}).end()
 })
 
 const PORT = 3001
