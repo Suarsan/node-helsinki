@@ -6,19 +6,9 @@ const Person = require('./models/person')
 
 const app = express()
 
-const errorHandler = (error, request, response, next) => {
-  console.dir('errorhandler')
-  console.error(error.message)
-  if (error.name === 'CastError') {
-    return response.status(400).send({ error: 'malformatted id' })
-  } 
-  next(error)
-}
-
 app.use(express.json())
 app.use(morgan('tiny'))
 app.use(cors())
-app.use(errorHandler)
 
 app.get('/api/info', (req, res) => {
   Person.find({}).then(persons => {
@@ -57,6 +47,12 @@ app.delete('/api/persons/:id', (req, res, next) => {
     res.send({id: req.params.id})
   }).catch(err => next(err))
 })
+
+const errorHandler = (error, request, response, next) => {
+  response.status(401).send(error.message)
+  next(error)
+}
+app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
