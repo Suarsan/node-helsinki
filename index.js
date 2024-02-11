@@ -20,26 +20,39 @@ app.use(morgan('tiny'))
 app.use(cors())
 app.use(errorHandler)
 
-app.get('/api/persons', (req, res) => {
+app.get('/api/info', (req, res) => {
+  Person.find({}).then(persons => {
+    res.send(`<p>Phonebook has info for ${persons.length} people</p><p>${new Date()}</p>`)
+  }).catch(err => next(err))
+})
+
+app.get('/api/persons', (req, res, next) => {
   Person.find({}).then(persons => {
     res.json(persons)
   }).catch(err => next(err))
 })
 
-app.post('/api/persons', (req, res) => {
+app.get('/api/persons/:id', (req, res, next) => {
+  Person.find({ _id: req.params.id}).then(person => {
+    res.json(person)
+  }).catch(err => next(err))
+})
+
+app.post('/api/persons', (req, res, next) => {
   const person = new Person(req.body)
   person.save().then(result => {
     res.send(person)
   }).catch(err => next(err))
 })
-app.put('/api/persons/:id', (req, res) => {
+
+app.put('/api/persons/:id', (req, res, next) => {
   const person = new Person(req.body)
   Person.updateOne({ _id : req.params.id }, req.body).then(result => {
     res.send(person)
   }).catch(err => next(err))
 })
 
-app.delete('/api/persons/:id', (req, res) => {
+app.delete('/api/persons/:id', (req, res, next) => {
   Person.deleteOne({ _id: req.params.id }).then(result => {
     res.send({id: req.params.id})
   }).catch(err => next(err))
