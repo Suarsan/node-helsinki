@@ -6,42 +6,43 @@ const Person = require('./models/person')
 
 const app = express()
 
+const errorHandler = (error, request, response, next) => {
+  console.dir('errorhandler')
+  console.error(error.message)
+  if (error.name === 'CastError') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } 
+  next(error)
+}
+
 app.use(express.json())
 app.use(morgan('tiny'))
 app.use(cors())
+app.use(errorHandler)
 
-app.get('/api/info', (req, res) => {
-  res.send(`<p>Phonebook has info for ${persons.length} people</p><p>${new Date()}</p>`)
+app.get('/api/persons', (req, res) => {
+  Person.find({}).then(persons => {
+    res.json(persons)
+  }).catch(err => next(err))
 })
 
 app.post('/api/persons', (req, res) => {
-  const person = new Person({ id: Math.floor(Math.random() * 1000), ...req.body })
-  if (!person.name) {
-    res.status(401).json({ error: 'Name is required' })
-  }
+  const person = new Person(req.body)
   person.save().then(result => {
-    console.log(`added ${person.name} number ${person.number} to phonebook`)
-  })
-  res.send(person)
+    res.send(person)
+  }).catch(err => next(err))
 })
-
-app.get('/api/persons', (req, res) => {
-  Person.find({}).then(notes => {
-    res.json(notes)
-  })
-})
-
-app.get('/api/persons/:id', (req, res) => {
-  const person = persons.find(p => p.id === parseInt(req.params.id))
-  if (!person) {
-    res.status(404).json({ error: 'Person not found' })
-  }
-  res.json(person)
+app.put('/api/persons/:id', (req, res) => {
+  const person = new Person(req.body)
+  Person.updateOne({ _id : req.params.id }, req.body).then(result => {
+    res.send(person)
+  }).catch(err => next(err))
 })
 
 app.delete('/api/persons/:id', (req, res) => {
-  persons = persons.filter(p => p.id !== parseInt(req.params.id))
-  res.send({id: parseInt(req.params.id)}).end()
+  Person.deleteOne({ _id: req.params.id }).then(result => {
+    res.send({id: req.params.id})
+  }).catch(err => next(err))
 })
 
 const PORT = process.env.PORT
